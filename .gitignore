@@ -1,0 +1,38 @@
+# Rust build artifacts
+/target/
+**/*.rs.bk
+*.pdb
+
+# Cargo
+Cargo.lock
+
+# IDE and editor files
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Debug files
+*.dSYM/
+
+# Environment files
+.env
+.env.local
+
+# Test coverage
+tarpaulin-report.html
+cobertura.xml
+coverage/
+
+# Benchmark results
+/target/criterion/
+
+# Documentation
+/target/doc/
+
+# Temporary files
+*.tmp
+temp/

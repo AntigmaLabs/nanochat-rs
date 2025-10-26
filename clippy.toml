@@ -1,0 +1,7 @@
+# Clippy configuration
+cognitive-complexity-threshold = 30
+max-fn-params-bools = 3
+type-complexity-threshold = 250
+too-many-arguments-threshold = 7
+too-many-lines-threshold = 100
+msrv = "1.70.0"
