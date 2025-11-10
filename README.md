@@ -5,8 +5,8 @@ the reference while keeping the code minimal.
 
 
 ## Features
-- Candle-based tensors and NN modules
-- More idiomatic Rust structure/names
+- Native rust
+- Integration with HuggingFace
 - Centralized model loader resilient to tensor name changes
 - Minimal surface area to keep cognitive load low (not product-grade)
 - Compatible with tiktoken `.pkl` tokenizer configs

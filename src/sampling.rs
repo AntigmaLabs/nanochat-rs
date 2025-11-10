@@ -1,5 +1,5 @@
-use anyhow::Result;
-use candle_core::{DType, Tensor, D};
+use anyhow::{Context, Result};
+use candle_core::{DType, Device, Tensor, D};
 use candle_nn::ops::softmax_last_dim;
 use rand::Rng;
 use rand_distr::{weighted::WeightedIndex, Distribution};
@@ -34,11 +34,9 @@ pub fn sample_next_token<R: Rng + ?Sized>(
     if k_eff < vocab {
         // Sort descending to get per-row top-k values and indices
         let (values_sorted, indices_sorted) = logits.sort_last_dim(false)?;
+
         let topk_vals = values_sorted.narrow(D::Minus1, 0, k_eff)?;
-        // Ensure index dtype matches host extraction type
-        let topk_idx = indices_sorted
-            .narrow(D::Minus1, 0, k_eff)?
-            .to_dtype(DType::U32)?;
+        let topk_idx = indices_sorted.narrow(D::Minus1, 0, k_eff)?;
 
         // Temperature-scale then softmax only over top-k
         let probs = softmax_last_dim(&(&topk_vals / temperature)?)?;
@@ -46,7 +44,6 @@ pub fn sample_next_token<R: Rng + ?Sized>(
         // Sample with index mapping
         return sample_from_probs(&probs, Some(&topk_idx), rng);
     }
-
     // Full-vocab path: scale by temperature, softmax over V, sample
     let probs = softmax_last_dim(&(logits / temperature)?)?;
     sample_from_probs(&probs, None, rng)
@@ -69,7 +66,10 @@ fn sample_from_probs<R: Rng + ?Sized>(
     let probs_rows = probs_f32.to_vec2::<f32>()?;
 
     let sampled_indices: Result<Vec<u32>> = if let Some(mapping) = index_mapping {
-        let mapping_rows = mapping.to_vec2::<u32>()?;
+        let mapping_rows = mapping
+            .to_device(&Device::Cpu)
+            .and_then(|t| t.to_vec2::<u32>())
+            .context("Failed to convert index mapping to vec2<u32>")?;
         probs_rows
             .iter()
             .zip(mapping_rows.iter())

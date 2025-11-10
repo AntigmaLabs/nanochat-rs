@@ -18,7 +18,7 @@ struct Args {
     prompt: String,
 
     /// Temperature for sampling
-    #[arg(short = 't', long = "temperature", default_value_t = 0.6)]
+    #[arg(short = 't', long = "temperature", default_value_t = 0.0)]
     temperature: f64,
 
     /// Top-k sampling (0 disables)
@@ -26,7 +26,7 @@ struct Args {
     top_k: usize,
 
     /// Max new tokens per assistant response
-    #[arg(long = "max-tokens", default_value_t = 256)]
+    #[arg(long = "max-tokens", default_value_t = 512)]
     max_tokens: usize,
 
     /// Source of the model local director or HuggingFace repository.

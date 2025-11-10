@@ -7,6 +7,7 @@ use serde_pickle::de::DeOptions;
 use std::cmp::{Ordering, Reverse};
 use std::collections::BinaryHeap;
 use std::{collections::HashMap, fs::File, io::BufReader, path::Path};
+use tracing::debug;
 
 use crate::model::TokenId;
 
@@ -250,7 +251,7 @@ impl Tokenizer {
             } else if let Some(token_bytes) = self.decoder.get(&tok) {
                 bytes.extend(token_bytes);
             } else {
-                // Unknown token - skip
+                debug!("Unknown token: {}", tok);
             }
         }
 
