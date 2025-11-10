@@ -21,11 +21,6 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 candle-core = { version = "0.9" }
 candle-nn = { version = "0.9" }
 
-# Use Metal dependencies for Apple platforms
-[target.'cfg(target_os = "macos")'.dependencies]
-candle-core = { version = "0.9", features = ["metal"] }
-candle-nn = { version = "0.9", features = ["metal"] }
-
 rand = { version = "0.9" }
 rand_distr = { version = "0.5" }
 serde_bytes = "0.11.19"
@@ -33,6 +28,7 @@ serde-pickle = "1.2.0"
 fancy-regex = "0.16.2"
 ahash = "0.8"
 hf-hub = "0.4.3"
+
 
 [dev-dependencies]
 # Testing dependencies
@@ -61,3 +57,8 @@ opt-level = 3
 lto = true
 codegen-units = 1
 strip = true
+
+# Use Metal dependencies for Apple platforms
+[target.'cfg(target_os = "macos")'.dependencies]
+candle-core = { version = "0.9", features = ["metal"] }
+candle-nn = { version = "0.9", features = ["metal"] }
