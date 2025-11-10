@@ -53,8 +53,7 @@ fn gpt_logits_test(path: &Path) -> TestResult<()> {
     // Sample from the last time step only: logits is (B, T, V) -> take (B, V)
     let (_b, t, _v) = logits.dims3()?;
     let last = logits.narrow(D::Minus2, t - 1, 1)?.squeeze(D::Minus2)?; // (B, V)
-    let top_k = Some(100);
-    let next_tokens = sample_next_token(&last, &mut rng, 0.1, top_k)?;
+    let next_tokens = sample_next_token(&last, &mut rng, 0.0, None)?;
     let next_tokens = next_tokens.to_vec2::<u32>()?;
 
     assert_eq!(next_tokens[0], case.tokens);
