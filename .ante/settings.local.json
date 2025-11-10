@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cargo test:*)",
+      "Bash(cargo build:*)",
+      "Bash(python3:*)",
+      "Bash(source:*)",
+      "Bash(bash -c \"cd reference && source .venv/bin/activate && python3 -c \"\"\nimport torch.nn as nn\nimport inspect\n# Check RMSNorm class for default eps\nprint(inspect.signature(nn.RMSNorm.__init__))\n\"\"\")",
+      "Bash(find:*)",
+      "Bash(.venv/bin/python3:*)",
+      "WebSearch",
+      "Bash(bash -c \"cd reference && source .venv/bin/activate && python3 -c \"\"\nimport torch.nn.functional as F\nimport inspect\n# Check F.rms_norm signature\nprint(inspect.signature(F.rms_norm))\n\"\"\")",
+      "Bash(bash -c \"source .venv/bin/activate && python3 -c \"\"\nimport torch.nn.functional as F\nimport inspect\n# Check F.rms_norm signature\nprint(inspect.signature(F.rms_norm))\n\"\"\")",
+      "Bash(bash:*)",
+      "Bash(cargo run:*)",
+      "Bash(chmod:*)",
+      "Bash(echo:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(cargo bench:*)",
+      "Bash(cargo check:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

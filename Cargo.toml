@@ -1,34 +1,57 @@
 [package]
-name = "rust-template"
+name = "nanochat-rs"
 version = "0.1.0"
 edition = "2021"
-authors = ["Your Name <you@example.com>"]
-description = "A template for Rust projects"
+authors = ["Mohan Z<mohanz@antigma.ai>"]
+description = "A Rust implementation of nanochat"
 readme = "README.md"
-repository = "https://github.com/yourusername/rust-template"
+repository = "https://github.com/mohanz/nanochat-rs"
 license = "MIT OR Apache-2.0"
-keywords = ["template", "rust"]
-categories = ["template"]
+keywords = ["nanochat", "rust"]
 
 [dependencies]
 # Common dependencies - uncomment as needed
-# serde = { version = "1.0", features = ["derive"] }
-# serde_json = "1.0"
-# tokio = { version = "1", features = ["full"] }
-# anyhow = "1.0"
-# thiserror = "1.0"
-# clap = { version = "4.0", features = ["derive"] }
-# tracing = "0.1"
-# tracing-subscriber = "0.3"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1", features = ["full"] }
+anyhow = "1.0"
+clap = { version = "4.0", features = ["derive"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+candle-core = { version = "0.9" }
+candle-nn = { version = "0.9" }
+
+rand = { version = "0.9" }
+rand_distr = { version = "0.5" }
+serde_bytes = "0.11.19"
+serde-pickle = "1.2.0"
+fancy-regex = "0.16.2"
+ahash = "0.8"
+bumpalo = "3.16"
+hf-hub = "0.4.3"
 
 [dev-dependencies]
 # Testing dependencies
-criterion = "0.5"
+criterion = "0.7"
 pretty_assertions = "1.0"
+datatest-stable = "0.3"
 
 [[bench]]
 name = "benchmarks"
 harness = false
+
+[[test]]
+name = "fixture_test"
+harness = false
+
+[features]
+# Enable GPU backends by passing `--features cuda` or `--features metal`
+# Optional: `accelerate` for Apple CPU acceleration
+default = []
+cuda = ["candle-core/cuda", "candle-nn/cuda"]
+metal = ["candle-core/metal", "candle-nn/metal"]
+accelerate = ["candle-core/accelerate", "candle-nn/accelerate"]
 
 [profile.release]
 opt-level = 3

@@ -1,0 +1,26 @@
+{
+  "model_config": {
+    "sequence_len": 64,
+    "vocab_size": 32,
+    "n_layer": 2,
+    "n_head": 2,
+    "n_kv_head": 2,
+    "n_embd": 64
+  },
+  "tensors": [
+    "transformer.wte.weight",
+    "transformer.h.0.attn.c_q.weight",
+    "transformer.h.0.attn.c_k.weight",
+    "transformer.h.0.attn.c_v.weight",
+    "transformer.h.0.attn.c_proj.weight",
+    "transformer.h.0.mlp.c_fc.weight",
+    "transformer.h.0.mlp.c_proj.weight",
+    "transformer.h.1.attn.c_q.weight",
+    "transformer.h.1.attn.c_k.weight",
+    "transformer.h.1.attn.c_v.weight",
+    "transformer.h.1.attn.c_proj.weight",
+    "transformer.h.1.mlp.c_fc.weight",
+    "transformer.h.1.mlp.c_proj.weight",
+    "lm_head.weight"
+  ]
+}

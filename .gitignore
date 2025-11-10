@@ -33,6 +33,12 @@ coverage/
 # Documentation
 /target/doc/
 
+# uv environments
+.venv/
+.python-version
+.uv/
+**/*.egg-info/
+**/__pycache__/
 # Temporary files
 *.tmp
 temp/

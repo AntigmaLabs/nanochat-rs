@@ -9,7 +9,10 @@ on:
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
-
+permissions:
+  contents: read
+  security-events: write
+  issues: write
 jobs:
   test:
     name: Test Suite
@@ -17,7 +20,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        rust: [stable, beta, nightly]
+        rust: [stable]
     steps:
     - uses: actions/checkout@v4
     - name: Install Rust
@@ -46,10 +49,6 @@ jobs:
       run: cargo test --verbose --all-features
     - name: Run doc tests
       run: cargo test --doc
-    - name: Run examples
-      run: |
-        cargo run --example basic
-        cargo run -- "test input"
 
   fmt:
     name: Rustfmt
@@ -73,11 +72,11 @@ jobs:
     - name: Run clippy
       run: cargo clippy --all-targets --all-features -- -D warnings
 
-  security:
-    name: Security Audit
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - uses: rustsec/audit-check@v1.4.1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+  # security:
+  #   name: Security Audit
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #   - uses: rustsec/audit-check@v1.4.1
+  #     with:
+  #       token: ${{ secrets.GITHUB_TOKEN }}

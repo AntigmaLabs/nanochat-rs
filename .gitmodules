@@ -1,6 +1,3 @@
-[submodule "candle"]
-	path = submodules/candle
-	url = https://github.com/huggingface/candle
-[submodule "nanochat"]
-	path = submodules/nanochat
+[submodule "reference/nanochat"]
+	path = reference/nanochat
 	url = https://github.com/karpathy/nanochat
