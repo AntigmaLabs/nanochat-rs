@@ -8,7 +8,7 @@ the reference while keeping the code minimal.
 - Native rust
 - Integration with HuggingFace
 - Centralized model loader resilient to tensor name changes
-- Minimal surface area to keep cognitive load low (not product-grade)
+- Minimal surface area to keep cognitive load low (not production-grade, performance-readability trade-off)
 - Compatible with tiktoken `.pkl` tokenizer configs
 
 ### Main difference with the referenced nanochat
@@ -20,7 +20,8 @@ the reference while keeping the code minimal.
 
 ## Quick start
 we have a 32 layer version trained with about $1000 budget at hugging face: https://huggingface.co/Antigma/nanochat-d32
-there is also a smaller 20 layer version d20 used for benchmark and testing within the same repo
+there is also a smaller 20 layer version d20 used for benchmark and testing within the same HuggingFace repo
+
 run on Apple With GPU
 ```
 cargo run --release --features metal -- -p "write 100 words"
@@ -32,7 +33,11 @@ cargo run --release --features cuda -- -p "write 100 words"
 
 ```
 
-###
+## Demo
+
+<video src="./demo1.mov" controls playsinline muted loop width="720"></video>
+
+Direct link: [demo1.mov](./demo1.mov)
 
 Build:
 ```
@@ -71,6 +76,7 @@ Tokenizer tests expect a tiktoken pickle at `reference/tokenizer.pkl` (a small
 one is provided in the repo).
 
 ## High level roadmap
+- A webserver to match original pythong reference
 - SFT and RL(requires backward pass)
 - (maybe) bring back the embedded python(or any context free language like Lua) 
 - Additional tensor backend other than Candle

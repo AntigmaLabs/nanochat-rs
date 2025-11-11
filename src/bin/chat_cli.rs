@@ -8,6 +8,7 @@ use nanochat_rs::engine::{Engine, SamplingParams};
 use nanochat_rs::hf;
 use nanochat_rs::model::builder::load_model_from_files;
 use nanochat_rs::tokenizer::special_tokens;
+use tracing::debug;
 use tracing_subscriber::filter::EnvFilter;
 
 #[derive(Parser, Debug)]
@@ -83,7 +84,7 @@ fn main() -> Result<()> {
 
     let files = ModelFiles::new_from_dir(&dir)?;
 
-    println!("Loading model from files: {:?}", files);
+    debug!("Loading model from files: {:?}", files);
     let (model, tokenizer) = load_model_from_files(&files)?;
     println!("Model loaded: device={:?}", model.device());
     let engine = Engine::new(model);
