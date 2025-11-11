@@ -4,11 +4,15 @@ Tiny GPT-style core reimplemented in pure Rust, tracking
 the reference while keeping the code minimal.
 
 
+> [!WARNING]
+> Experimental and focus on inference for now.
+
+
 ## Features
 - Native rust
 - Integration with HuggingFace
 - Centralized model loader resilient to tensor name changes
-- Minimal surface area to keep cognitive load low (not production-grade, performance-readability trade-off)
+- Minimal surface area to keep cognitive load low (not production-grade, performance-simplicity trade-off)
 - Compatible with tiktoken `.pkl` tokenizer configs
 
 ### Main difference with the referenced nanochat
@@ -34,10 +38,9 @@ cargo run --release --features cuda -- -p "write 100 words"
 ```
 
 ## Demo
+<video src="demo1.mp4" controls width="720"></video>
 
-<video src="./demo1.mov" controls playsinline muted loop width="720"></video>
-
-Direct link: [demo1.mov](./demo1.mov)
+Direct link: [demo1.mp4](./demo1.mp4)
 
 Build:
 ```
@@ -76,10 +79,10 @@ Tokenizer tests expect a tiktoken pickle at `reference/tokenizer.pkl` (a small
 one is provided in the repo).
 
 ## High level roadmap
-- A webserver to match original pythong reference
+- A webserver to match original python reference
 - SFT and RL(requires backward pass)
-- (maybe) bring back the embedded python(or any context free language like Lua) 
-- Additional tensor backend other than Candle
+- (maybe) bring back the embedded python interpreter (or other context free language like Lua) 
+- Additional tensor backend other than Candle, encountered many candle kernel issues while building this.
 - Pretraining (low priority, likely limited utility to do full training in Rust)
 
 ## License
