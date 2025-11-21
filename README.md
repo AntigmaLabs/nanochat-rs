@@ -37,6 +37,23 @@ cargo run --release --features cuda -- -p "write 100 words"
 
 ```
 
+We also provide a ChatGPT-like web UI. To launch it, run:
+
+```
+cargo run --bin chat_web
+```
+
+After starting the server, visit the URL displayed in the terminal (by default, [http://localhost:8000/](http://localhost:8000/), or use your host's public IP/port if running on a remote machine).
+
+You can now interact with your local LLM just like ChatGPT—try asking creative questions, writing stories, or exploring model behavior.
+
+> [!NOTE]
+> The web UI assets (`ui.html`, `logo.svg`, etc.) live inside the `reference/nanochat` submodule. Make sure you initialize submodules before running `chat_web`:
+> ```
+> git submodule update --init --recursive
+> ```
+> The web server loads a model from Hugging Face by default (`hf:Antigma/nanochat-d32`). If you already have the weights locally, point the server to them with `--source /path/to/model_dir` to avoid unnecessary downloads.
+
 ## Demo
 <video src="demo1.mp4" controls width="720"></video>
 
