@@ -96,7 +96,6 @@ Tokenizer tests expect a tiktoken pickle at `reference/tokenizer.pkl` (a small
 one is provided in the repo).
 
 ## High level roadmap
-- A webserver to match original python reference
 - SFT and RL(requires backward pass)
 - (maybe) bring back the embedded python interpreter (or other context free language like Lua) 
 - Additional tensor backend other than Candle, encountered many candle kernel issues while building this.
