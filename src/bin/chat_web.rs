@@ -393,7 +393,7 @@ async fn stats_handler(State(state): State<AppState>) -> impl IntoResponse {
 async fn chat_completions(
     State(state): State<AppState>,
     Json(request): Json<ChatRequest>,
-) -> Result<Sse<UnboundedReceiverStream<Result<Event, std::convert::Infallible>>>, ApiError> {
+) -> Result<impl IntoResponse, ApiError> {
     validate_chat_request(&request)?;
 
     info!("====================");
@@ -540,7 +540,7 @@ fn validate_chat_request(request: &ChatRequest) -> Result<(), ApiError> {
             )));
         }
         total_length += len;
-        if !matches!(message.role.as_str(), "user" | "assistant") {
+        if !matches!(message.role.as_str(), "user" | "assistant" | "system") {
             return Err(ApiError::validation(format!(
                 "Message {} has invalid role. Must be 'user', 'assistant', or 'system'",
                 idx
