@@ -100,4 +100,16 @@ impl GPT {
     pub fn dtype(&self) -> DType {
         self.token_embed.embeddings().dtype()
     }
+
+    /// Convenience: compute cross-entropy loss against targets with optional reduction.
+    /// This runs a forward pass (no KV cache) to obtain logits, then computes CE with ignore_index=-1.
+    pub fn loss(
+        &self,
+        input_ids: &Tensor,
+        targets: &Tensor,
+        reduction: crate::model::loss::LossReduction,
+    ) -> Result<Tensor> {
+        let logits = self.forward(input_ids, None)?;
+        crate::model::loss::cross_entropy_loss(&logits, targets, -1, reduction)
+    }
 }
