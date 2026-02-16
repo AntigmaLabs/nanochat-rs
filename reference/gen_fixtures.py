@@ -35,6 +35,8 @@ class TestCase:
     description: Optional[str] = None
     seed: int = 42
     input: Any = None
+    temperature: float = 0.0
+    top_k: Optional[int] = None
 
 
 
@@ -116,7 +118,15 @@ def gpt_logits(model, test_case: TestCase, dir: Path):
     with torch.no_grad():
         logits = model.forward(input_tensor, targets=None, kv_cache=None)
         start_tokens = test_case.input[0]
-        tokens = list(model.generate(start_tokens, max_tokens=1, temperature=0.0, top_k=None, seed=test_case.seed))
+        tokens = list(
+            model.generate(
+                start_tokens,
+                max_tokens=1,
+                temperature=test_case.temperature,
+                top_k=test_case.top_k,
+                seed=test_case.seed,
+            )
+        )
 
     print(f"  Output shape: {logits.shape}")
     print(f"  Logits range: [{logits.min():.4f}, {logits.max():.4f}]")
@@ -128,6 +138,8 @@ def gpt_logits(model, test_case: TestCase, dir: Path):
         "logits": logits.tolist(),
         "seed": test_case.seed,
         "tokens": tokens,
+        "temperature": test_case.temperature,
+        "top_k": test_case.top_k,
     }
     with open(path, "w") as f:
         json.dump(fixture, f, indent=2)
@@ -162,7 +174,22 @@ def generate_fixtures(output_dir: str = "fixtures", seed: int = 42):
     logits_dir = output_dir / "gpt_logits"
     logits_dir.mkdir(exist_ok=True)
     # Generate deterministic test cases from provided seed
-    for test_case in generate_random_token_input_cases(seed, num_cases=10, batch_size=1):
+    cases = generate_random_token_input_cases(seed, num_cases=10, batch_size=1)
+    # Upstream generate() treats top_k=0 as "disable filtering".
+    # Keep one fixture on this code path to catch regressions.
+    if cases:
+        base = cases[0]
+        cases.append(
+            TestCase(
+                name=f"{base.name}_topk0",
+                seed=base.seed,
+                input=base.input,
+                temperature=0.0,
+                top_k=0,
+            )
+        )
+
+    for test_case in cases:
         gpt_logits(model, test_case, logits_dir)
     # Print directory tree for quick inspection
     print("\nOutput directory tree:")

@@ -53,7 +53,12 @@ fn gpt_logits_test(path: &Path) -> TestResult<()> {
     // Sample from the last time step only: logits is (B, T, V) -> take (B, V)
     let (_b, t, _v) = logits.dims3()?;
     let last = logits.narrow(D::Minus2, t - 1, 1)?.squeeze(D::Minus2)?; // (B, V)
-    let next_tokens = sample_next_token(&last, &mut rng, 0.0, None)?;
+    let next_tokens = sample_next_token(
+        &last,
+        &mut rng,
+        case.temperature.unwrap_or(0.0),
+        case.top_k,
+    )?;
     let next_tokens = next_tokens.to_vec2::<u32>()?;
 
     assert_eq!(next_tokens[0], case.tokens);
@@ -90,6 +95,8 @@ struct LogitsCase {
     logits: Vec<Vec<Vec<f32>>>, // [B, T, V]
     seed: u64,
     tokens: Vec<TokenId>, // [B, T]
+    temperature: Option<f64>,
+    top_k: Option<usize>,
 }
 impl LogitsCase {
     fn from_file(path: &Path) -> Result<Self> {
