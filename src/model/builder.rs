@@ -1,4 +1,5 @@
 use std::fs;
+use std::panic::{catch_unwind, UnwindSafe};
 use std::path::Path;
 
 use anyhow::{ensure, Result};
@@ -110,12 +111,46 @@ pub fn load_model_from_files(files: &ModelFiles) -> Result<(GPT, Tokenizer)> {
 
 pub fn pick_device(local_rank: usize) -> candle_core::Result<Device> {
     if utils::cuda_is_available() {
-        // Try CUDA, fall back to CPU if the ordinal is invalid/unusable
-        Device::new_cuda(local_rank).or(Ok(Device::Cpu))
-    } else if utils::metal_is_available() {
-        // Try Metal, fall back to CPU
-        Device::new_metal(0).or(Ok(Device::Cpu))
-    } else {
-        Ok(Device::Cpu)
+        // Try CUDA, fall back to CPU if unavailable/unusable.
+        if let Some(device) = safe_try_device(|| Device::new_cuda(local_rank)) {
+            return Ok(device);
+        }
+    }
+    if utils::metal_is_available() {
+        // Candle Metal initialization may panic on misconfigured environments.
+        if let Some(device) = safe_try_device(|| Device::new_metal(0)) {
+            return Ok(device);
+        }
+    }
+    Ok(Device::Cpu)
+}
+
+fn safe_try_device<F>(f: F) -> Option<Device>
+where
+    F: FnOnce() -> candle_core::Result<Device> + UnwindSafe,
+{
+    match catch_unwind(f) {
+        Ok(Ok(device)) => Some(device),
+        Ok(Err(_)) | Err(_) => None,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::safe_try_device;
+    use candle_core::Device;
+
+    #[test]
+    fn safe_try_device_returns_none_on_panic() {
+        let got = safe_try_device(|| -> candle_core::Result<Device> {
+            panic!("simulated backend panic");
+        });
+        assert!(got.is_none());
+    }
+
+    #[test]
+    fn safe_try_device_returns_device_on_success() {
+        let got = safe_try_device(|| Ok(Device::Cpu));
+        assert!(matches!(got, Some(Device::Cpu)));
     }
 }

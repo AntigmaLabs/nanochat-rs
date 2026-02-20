@@ -164,22 +164,35 @@ impl Worker {
     fn build_conversation(&self, messages: &[ChatMessage]) -> Result<Vec<u32>> {
         let mut tokens = vec![self.bos];
         for message in messages {
-            match message.role.as_str() {
-                "user" => {
-                    tokens.push(self.user_start);
-                    tokens.extend(self.tokenizer.encode(&message.content)?);
-                    tokens.push(self.user_end);
-                }
-                "assistant" => {
-                    tokens.push(self.assistant_start);
-                    tokens.extend(self.tokenizer.encode(&message.content)?);
-                    tokens.push(self.assistant_end);
-                }
-                other => bail!("Unsupported role during encoding: {}", other),
-            }
+            let (start_token, end_token) = role_boundaries(
+                message.role.as_str(),
+                self.user_start,
+                self.user_end,
+                self.assistant_start,
+                self.assistant_end,
+            )?;
+            tokens.push(start_token);
+            tokens.extend(self.tokenizer.encode(&message.content)?);
+            tokens.push(end_token);
         }
         tokens.push(self.assistant_start);
         Ok(tokens)
+    }
+}
+
+fn role_boundaries(
+    role: &str,
+    user_start: u32,
+    user_end: u32,
+    assistant_start: u32,
+    assistant_end: u32,
+) -> Result<(u32, u32)> {
+    match role {
+        // The tokenizer doesn't define dedicated system delimiters, so map
+        // system messages to user boundaries for prompt construction.
+        "user" | "system" => Ok((user_start, user_end)),
+        "assistant" => Ok((assistant_start, assistant_end)),
+        other => bail!("Unsupported role during encoding: {}", other),
     }
 }
 
@@ -688,4 +701,95 @@ fn init_tracing() {
         .with_env_filter(env_filter)
         .with_target(false)
         .try_init();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        role_boundaries, validate_chat_request, ChatMessage, ChatRequest, MAX_MESSAGES_PER_REQUEST,
+        MAX_MESSAGE_LENGTH,
+    };
+
+    #[test]
+    fn role_boundaries_accepts_system_as_user_delimiters() {
+        let user_start = 10u32;
+        let user_end = 11u32;
+        let assistant_start = 20u32;
+        let assistant_end = 21u32;
+
+        let got = role_boundaries(
+            "system",
+            user_start,
+            user_end,
+            assistant_start,
+            assistant_end,
+        )
+        .expect("system should be encodable");
+
+        assert_eq!(got, (user_start, user_end));
+    }
+
+    #[test]
+    fn validate_chat_request_accepts_system_role() {
+        let req = ChatRequest {
+            messages: vec![
+                ChatMessage {
+                    role: "system".to_string(),
+                    content: "be concise".to_string(),
+                },
+                ChatMessage {
+                    role: "user".to_string(),
+                    content: "hello".to_string(),
+                },
+            ],
+            temperature: Some(0.8),
+            max_tokens: Some(64),
+            top_k: Some(50),
+        };
+
+        validate_chat_request(&req).expect("system role should pass request validation");
+    }
+
+    #[test]
+    fn validate_chat_request_rejects_too_many_messages() {
+        let messages = (0..=MAX_MESSAGES_PER_REQUEST)
+            .map(|_| ChatMessage {
+                role: "user".to_string(),
+                content: "hello".to_string(),
+            })
+            .collect();
+        let req = ChatRequest {
+            messages,
+            temperature: None,
+            max_tokens: None,
+            top_k: None,
+        };
+
+        let err = validate_chat_request(&req).expect_err("should reject message overflow");
+        let msg = match err {
+            super::ApiError::Validation(msg) => msg,
+            super::ApiError::Internal(_) => "internal".to_string(),
+        };
+        assert!(msg.contains("Too many messages"));
+    }
+
+    #[test]
+    fn validate_chat_request_rejects_overlong_message() {
+        let req = ChatRequest {
+            messages: vec![ChatMessage {
+                role: "user".to_string(),
+                content: "a".repeat(MAX_MESSAGE_LENGTH + 1),
+            }],
+            temperature: None,
+            max_tokens: None,
+            top_k: None,
+        };
+
+        let err = validate_chat_request(&req).expect_err("should reject long message");
+        let msg = match err {
+            super::ApiError::Validation(msg) => msg,
+            super::ApiError::Internal(_) => "internal".to_string(),
+        };
+        assert!(msg.contains("too long"));
+    }
 }
